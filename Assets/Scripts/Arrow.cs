@@ -1,35 +1,40 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class Arrow : MonoBehaviour {
 
     
-    private Rigidbody2D _rigidbody;
-    private string _bowTag;
+    private Rigidbody2D _rigidBody;
     private int _damage;
+    private List<EntityTag> _targetEntityTags;
+    private int _shooterId;
 
     public void Awake() {
-        _rigidbody = GetComponent<Rigidbody2D>();
+        _rigidBody = GetComponent<Rigidbody2D>();
+
+
     }
 
-    public void Initialize(Vector2 force, float targetGravity, int damage, string tag, Color color) {
+    public void Initialize(Vector2 force, float targetGravity, int damage, List<EntityTag> targetEntityTags, int shooterId)
+    {
 
-        Debug.Log(force);
-
-        GetComponent<SpriteRenderer>().color = color;
+        _targetEntityTags = targetEntityTags;
+        _shooterId = shooterId;
 
         try
         {
-            _rigidbody.gravityScale = PhysicsFunctions.GravityScale(targetGravity, Physics.gravity.magnitude);
+            _rigidBody.gravityScale = PhysicsFunctions.GravityScale(targetGravity, Physics.gravity.magnitude);
 
-            _rigidbody.AddForce(force * _rigidbody.mass, ForceMode2D.Impulse);
+            _rigidBody.AddForce(force * _rigidBody.mass, ForceMode2D.Impulse);
 
 
         }
         catch{}
 
         //_rigidbody.AddForce(force);
-        _bowTag = tag;
 
         _damage = damage;
 
@@ -43,26 +48,38 @@ public class Arrow : MonoBehaviour {
     }
 
     public void FixedUpdate() {
-        Vector2 v = _rigidbody.velocity;
+        Vector2 v = _rigidBody.velocity;
         var angle = Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 
-    private void OnTriggerEnter2D(Collider2D other) {
+    private void OnTriggerEnter2D(Collider2D other)
+    {
 
-        if (other.tag != _bowTag) {
-            //_rigidbody.velocity = Vector2.zero;
-
-            //this.enabled = false;
-            //_rigidbody.isKinematic = true;
-            //this.transform.parent = other.transform;
-
-            if (other.tag != "Untagged") {
-                other.SendMessage("MessageDamage", _damage);
-                GameObject.Destroy(gameObject);
-            }
-
-            
+        if (other.tag == "Floor")
+        {
+            Destroy(gameObject);
         }
+
+        if (other.GetInstanceID() == _shooterId)
+        {
+            return;
+        }
+
+        var otherEntity = other.GetComponent<Entity>();
+        if (otherEntity == null)
+        {
+            return;
+        }
+
+        if (otherEntity.CanBeTargetedBy(_targetEntityTags))
+        {
+            otherEntity.DoDamage(_damage);
+            Destroy(gameObject);
+        }
+        
+
     }
+
+   
 }

@@ -65,8 +65,19 @@ public class PhysicsFunctions
 
         onArrowVelocityFound?.Invoke(lateralSpeed, force, gravity);
     }
+    /*
+    public static float Distance(Vector3 a, Vector3 b)
+    {
+        return Vector2.Distance(a, b);
+    }
 
-    private static float Distance(Vector3 a, Vector3 b)
+    public static float Distance(Vector2 a, Vector3 b)
+    {
+        return Vector2.Distance(a, b);
+    }
+    */
+
+    public static float Distance(Vector2 a, Vector2 b)
     {
         return Vector2.Distance(a, b);
     }

@@ -478,7 +478,10 @@ public class Fts
     {
 
         // Handling these cases is up to your project's coding standards
-        Debug.Assert(proj_pos != target_pos && lateral_speed > 0 && max_height > proj_pos.y, "fts.solve_ballistic_arc called with invalid data");
+        Debug.Assert(proj_pos != target_pos, $"fts.solve_ballistic_arc called with invalid data [proj_pos = {proj_pos}] [target_pos = {target_pos}] ");
+        Debug.Assert(lateral_speed > 0, $"fts.solve_ballistic_arc called with invalid data [lateral_speed = {lateral_speed}]");
+        Debug.Assert(max_height > proj_pos.y, $"fts.solve_ballistic_arc called with invalid data [max_height = {max_height}] [proj_pos.y = {proj_pos.y}]");
+
 
         fire_velocity = Vector3.zero;
         gravity = float.NaN;

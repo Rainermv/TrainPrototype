@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Assets.Scripts;
@@ -9,32 +10,45 @@ using Random = UnityEngine.Random;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
-
-[RequireComponent(typeof(Entity))]
 public class Bow : MonoBehaviour
 {
+    public Arrow ArrowPrefab;
+    public EntityTag[] TargetEntityTags;
+    public ShotType ShotType;
+    [Space(2)]
     public float MaxRange;
     public int Damage;
     public float Cooldown;
     public float AimError = 1f;
+
+    [Space(2)]
+    [Header("Arc Shot")]
     public float ArcShotHeightToTarget = 1f;
     public float ArcShotLateralSpeed = 5;
-    public double DirectShotDistance = 3f;
+
+    [Space(2)]
+    [Header("Direct Shot")]
     public float DirectShotMaxSpeed = 5f;
     public float DirectShotMinSpeed = 20f;
 
-    public Arrow ArrowPrefab;
+    [Header("Dynamic Shot")]
+    public double DynamicShotDistanceTreshold = 3f;
+
+    
 
     [HideInInspector]
     public GameObject Target;
 
     private string _opponentTag;
+    private List<EntityTag> _targetEntityTags;
 
 
     //private float ShotMinSpeed => SHOT_NORMAL_SPEED * 0.5f;
 
 
     public Vector2 DebugDrawTarget { get; set; }
+
+    private Vector2 V2Position => (Vector2)transform.position;
 
     public void SetHeight(float height)
     {
@@ -47,6 +61,7 @@ public class Bow : MonoBehaviour
     private void Awake()
     {
         _opponentTag = Tags.ENEMY;
+        _targetEntityTags = TargetEntityTags.ToList();
     }
 
     // Start is called before the first frame update
@@ -65,9 +80,9 @@ public class Bow : MonoBehaviour
                 return false;
             }
 
-            //return Fts.ballistic_range(DirectShotMaxSpeed, Physics.gravity.magnitude, transform.position.y) <= MaxRange;
+            //return Fts.ballistic_range(DirectShotMaxSpeed, Physics.gravity.magnitude,V2Position.y) <= MaxRange;
 
-            return Vector2.Distance(Target.transform.position, transform.position) <= MaxRange;
+            return Vector2.Distance(Target.transform.position,V2Position) <= MaxRange;
         }
     }
 
@@ -85,7 +100,11 @@ public class Bow : MonoBehaviour
                 if (scan.Length > 0)
                 {
 
-                    var closestEnemy = scan.Where(e => e.tag == _opponentTag).OrderBy(e => (e.transform.position - transform.position).sqrMagnitude)
+                    var closestEnemy = scan.Where(e =>
+                        {
+                            var enemyEntity = e.GetComponent<Entity>();
+                            return enemyEntity != null && enemyEntity.CanBeTargetedBy(_targetEntityTags);
+                        }).OrderBy(e => ((Vector2)e.transform.position - V2Position).sqrMagnitude)
                         .FirstOrDefault();
 
                     if (closestEnemy != null)
@@ -111,46 +130,81 @@ public class Bow : MonoBehaviour
             if (Target != null)
             {
 
-                var aimPoint = AimToPointWithError(transform.position.x, Target, AimError);
-                
-                //var lateralSpeed = SHOT_MAX_SPEED;
-                if (PhysicsFunctions.LateralDistance(transform.position, aimPoint) < DirectShotDistance)
+                var aimPoint = AimToPointWithError(V2Position.x, Target, AimError);
+
+                switch (ShotType)
                 {
-                    DebugAimPoint(aimPoint, Color.red);
-                    // Straight Shot
-                    PhysicsFunctions.FindArrowVelocity(this.transform.position, aimPoint, 
-                        DirectShotMinSpeed,
-                        DirectShotMaxSpeed,
-                        Physics.gravity.magnitude,
-                        (speed, vector3) =>
-                        {
-                            Debug.Log($"Found target with speed: [{speed}]");
-                            ShootArrow(vector3);
-                        }, CannotShootArrow);
-
+                    case ShotType.Dynamic:
+                        ShootDynamic(aimPoint);
+                        break;
+                    case ShotType.Arc:
+                        ShootArc(aimPoint);
+                        break;
+                    case ShotType.Direct:
+                    default:
+                        ShootDirect(aimPoint);
+                        break;
                 }
-                else
-                {
-                    DebugAimPoint(aimPoint, Color.blue);
-                    // Shoot max speed at max distance using lateral velocity
-                    PhysicsFunctions.FindArrowVelocityLateral(this.transform.position,
-                        aimPoint,
-                        ArcShotLateralSpeed,
-                        aimPoint.y + ArcShotHeightToTarget,//ArcShotMaxHeight,
-                        (speed, vector3, gravity) =>
-                        {
-                            Debug.Log($"Found target with speed: [{speed}] and gravity [{gravity}]");
-                            ShootArrow(vector3, gravity);
-                        }, CannotShootArrow);
-
-                }
-
-
 
             }
 
             yield return new WaitForSeconds(Cooldown);
         }
+    }
+
+    private void ShootStraight(Vector2 aimPoint)
+    {
+        //var direction = (aimPoint - V2Position).normalized * ;
+
+
+
+    }
+
+    
+
+    private void ShootDynamic(Vector2 aimPoint)
+    {
+        //var lateralSpeed = SHOT_MAX_SPEED;
+        if (PhysicsFunctions.LateralDistance(V2Position, aimPoint) < DynamicShotDistanceTreshold)
+        {
+            ShootDirect(aimPoint);
+        }
+        else
+        {
+            ShootArc(aimPoint);
+        }
+    }
+
+    private void ShootArc(Vector2 aimPoint)
+    {
+        DebugAimPoint(aimPoint, Color.blue);
+        // Shoot max speed at max distance using lateral velocity
+        PhysicsFunctions.FindArrowVelocityLateral(this.transform.position,
+            aimPoint,
+            ArcShotLateralSpeed,
+            aimPoint.y + ArcShotHeightToTarget, //ArcShotMaxHeight,
+            (speed, vector3, gravity) =>
+            {
+                //Debug.Log($"Found target with speed: [{speed}] and gravity [{gravity}]");
+                ShootArrow(vector3, gravity);
+            }, CannotShootArrow);
+    }
+
+    private void ShootDirect(Vector2 aimPoint)
+    {
+        
+
+        DebugAimPoint(aimPoint, Color.red);
+        // Straight Shot
+        PhysicsFunctions.FindArrowVelocity(this.transform.position, aimPoint,
+            DirectShotMinSpeed,
+            DirectShotMaxSpeed,
+            Physics.gravity.magnitude,
+            (speed, vector3) =>
+            {
+                //Debug.Log($"Found target with speed: [{speed}]");
+                ShootArrow(vector3);
+            }, CannotShootArrow);
     }
 
     private static Vector2 AimToPointWithError(float originX, GameObject target, float aimErrorMagnitude)
@@ -176,19 +230,15 @@ public class Bow : MonoBehaviour
     }
 
 
-    private void ShootArrow(Vector3 force)
-    {
-        var arrow = Instantiate(ArrowPrefab, transform.position, Quaternion.identity).GetComponent<Arrow>();
 
-        arrow.Initialize(force, Physics.gravity.magnitude, Damage, tag, Color.red);
-    }
-
-    private void ShootArrow(Vector3 force, float targetGravity)
+    private void ShootArrow(Vector3 force, float? targetGravity = null)
     {
 
-        var arrow = Instantiate(ArrowPrefab, transform.position, Quaternion.identity).GetComponent<Arrow>();
+        targetGravity ??= Physics2D.gravity.magnitude;
+
+        var arrow = Instantiate(ArrowPrefab,V2Position, Quaternion.identity).GetComponent<Arrow>();
         
-        arrow.Initialize(force, targetGravity, Damage, tag, Color.white);
+        arrow.Initialize(force, (float)targetGravity, Damage, _targetEntityTags, this.GetInstanceID() );
     }
 
     /*
@@ -258,4 +308,11 @@ Vector3 calcBallisticVelocityVector(Vector3 source, Vector3 target, float angle)
         // Alternative way:
         // rigid.AddForce(finalVelocity * rigid.mass, ForceMode.Impulse);
     }
+}
+
+public enum ShotType
+{
+    Dynamic,
+    Direct,
+    Arc
 }

@@ -73,7 +73,5 @@ public class InterfaceController : MonoBehaviour
         var position = new Vector3(baseCastle.transform.position.x, lane.transform.position.y);
 
         var emoji = Instantiate(instantiatePrefab, position, Quaternion.identity);
-
-        emoji.Initialize(tag);
     }
 }
