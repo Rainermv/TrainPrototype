@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 5391026022713208868}
   - component: {fileID: 5391026022713208869}
   m_Layer: 7
-  m_Name: 'CircleOfDoom '
+  m_Name: En_CircleOfDoom
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -132,11 +132,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EntityMovementType: 2
   EntityTags: 04000000
-  Speed: 3
-  Health: 5
-  FlyByMoveAdjacentMagnitude: 0
+  Speed: 5
+  Health: 3
+  FlyByMovePointsBeforeExit: 1
+  FlyByMoveAdjacentMagnitude: 1
   FlyByWaitingTime: 1
-  FlyByMaxHeightFromPoint: 1
+  FlyByDistanceToReachPoint: 0.2
 --- !u!58 &5391026022713208868
 CircleCollider2D:
   m_ObjectHideFlags: 0

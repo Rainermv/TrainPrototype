@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using PlasticGui;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using Vector2 = UnityEngine.Vector2;
@@ -18,9 +19,11 @@ public class Entity : MonoBehaviour
     public float Speed;
     public int Health;
 
+    public int FlyByMovePointsBeforeExit = 3;
     public float FlyByMoveAdjacentMagnitude = 0;
     public float FlyByWaitingTime = 1;
-    public float FlyByMaxHeightFromPoint = 1;
+    public float FlyByDistanceToReachPoint = 0.5f;
+    private float FlyByMaxHeightFromPoint = 1;
 
 
     private Rigidbody2D _rigidbody2D;
@@ -30,6 +33,9 @@ public class Entity : MonoBehaviour
     private int maxHealth;
     private float directionMultiplier = 1;
     private List<EntityTag> _entityTags;
+    private EntityState _entityState;
+
+    public Action<EntityState> OnUpdateMoveState;
 
 
     private Vector2 V2Position => (Vector2)transform.position;
@@ -42,18 +48,29 @@ public class Entity : MonoBehaviour
 
         _entityTags = EntityTags.ToList();
 
+        foreach (var bowComponent in GetComponentsInChildren<Bow>())
+        {
+            bowComponent.Initialize(this);
+        }
+
         maxHealth = Health;
 
     }
 
     void Start()
     {
-
-        if (EntityMovementType == EntityMovementType.FlyBy)
+        switch (EntityMovementType)
         {
-            StartCoroutine(FlyByMovement());
+            case EntityMovementType.FlyBy:
+                StartCoroutine(FlyByMovement());
+                return;
+            case EntityMovementType.Horizontal:
+                UpdateMoveState(EntityState.Moving);
+                break;
+            case EntityMovementType.Stationary:
+                UpdateMoveState(EntityState.Stopped);
+                break;
         }
-        
     }
 
     private IEnumerator FlyByMovement()
@@ -62,19 +79,21 @@ public class Entity : MonoBehaviour
         var movePointsContainer = FindObjectOfType<MovePointsContainer>();
 
         //1. Find a point inside screenspace
-        var movePoints = movePointsContainer.GetRandomPointSequenceWithExit(3);
-        Debug.Log($"Move points: {string.Join(", ", movePoints.Select(movePoint => movePoint.name))}");
+        var movePoints = movePointsContainer.GetRandomPointSequenceWithExit(FlyByMovePointsBeforeExit);
+        //Debug.Log($"Move points: {string.Join(", ", movePoints.Select(movePoint => movePoint.name))}");
         var nextMoveTransform = GetFirstMoveTransform(movePoints);
         var adjustedMovePoint = GetRandomMovePointAroundTransform(nextMoveTransform);
         var velocity = Vector2.zero;
 
         while (true)
         {
-            if (V2Position == (Vector2)adjustedMovePoint)
+            if (PhysicsFunctions.Distance(V2Position, adjustedMovePoint) < FlyByDistanceToReachPoint)
             {
                 //3. Stays still for some time
-                Debug.Log($"Waiting for {FlyByWaitingTime}");
+                //Debug.Log($"Waiting for {FlyByWaitingTime}");
+                UpdateMoveState(EntityState.Stopped);
                 yield return new WaitForSeconds(FlyByWaitingTime);
+                UpdateMoveState(EntityState.Moving);
 
                 movePoints.RemoveAt(0);
 
@@ -95,6 +114,13 @@ public class Entity : MonoBehaviour
 
     }
 
+    private EntityState UpdateMoveState(EntityState newEntityState)
+    {
+        _entityState = newEntityState;
+        OnUpdateMoveState?.Invoke(_entityState);
+        return _entityState;
+    }
+
     private Vector2 GetRandomMovePointAroundTransform(Transform nextMoveTransform)
     {
         return Random.insideUnitCircle * Random.Range(1, FlyByMoveAdjacentMagnitude) + (Vector2)nextMoveTransform.position;
@@ -109,7 +135,7 @@ public class Entity : MonoBehaviour
 
         //1. Find a point inside screenspace
         var movePoints = movePointsContainer.GetRandomPointSequenceWithExit(3);
-        Debug.Log($"Move points: {string.Join(", ", movePoints.Select(movePoint => movePoint.name))}");
+        //Debug.Log($"Move points: {string.Join(", ", movePoints.Select(movePoint => movePoint.name))}");
         var nextMovePoint = GetFirstMovePoint(movePoints);
         while (true)
         {
@@ -168,8 +194,8 @@ public class Entity : MonoBehaviour
     private Vector2 GetFirstMovePoint(List<Transform> movePoints)
     {
         var movePointTransform = movePoints.FirstOrDefault();
-        Debug.Log($"Move points: {string.Join(", ", movePoints.Select(movePoint => movePoint.name))}");
-        Debug.Log($"Moving to {movePointTransform.name}");
+        //Debug.Log($"Move points: {string.Join(", ", movePoints.Select(movePoint => movePoint.name))}");
+        //Debug.Log($"Moving to {movePointTransform.name}");
 
         return movePointTransform.position;
     }
@@ -177,8 +203,8 @@ public class Entity : MonoBehaviour
     private Transform GetFirstMoveTransform(List<Transform> movePoints)
     {
         var movePointTransform = movePoints.FirstOrDefault();
-        Debug.Log($"Move points: {string.Join(", ", movePoints.Select(movePoint => movePoint.name))}");
-        Debug.Log($"Moving to {movePointTransform.name}");
+        //Debug.Log($"Move points: {string.Join(", ", movePoints.Select(movePoint => movePoint.name))}");
+        //Debug.Log($"Moving to {movePointTransform.name}");
 
         return movePointTransform;
     }
@@ -242,4 +268,10 @@ public class Entity : MonoBehaviour
     {
         return targetEntityTags.Any(tag => EntityTags.Contains(tag));
     }
+}
+
+public enum EntityState
+{
+    Stopped,
+    Moving
 }

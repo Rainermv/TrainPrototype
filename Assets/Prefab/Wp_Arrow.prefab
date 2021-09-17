@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6921989246372226914}
   - component: {fileID: 6921989246372226913}
   m_Layer: 6
-  m_Name: ArrowGun
+  m_Name: Wp_Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -46,13 +46,13 @@ MonoBehaviour:
   ArrowPrefab: {fileID: 5668274355080729497, guid: c2a2feb8089217840b750ac3122997be, type: 3}
   TargetEntityTags: 0300000004000000
   ShotType: 0
-  MaxRange: 10
+  MaxRange: 5
   Damage: 1
   Cooldown: 1
-  AimError: 1
-  ArcShotHeightToTarget: 2
-  ArcShotLateralSpeed: 5
+  AimError: 0
+  ArcShotHeightToTarget: 3
+  ArcShotLateralSpeed: 7
   DirectShotMaxSpeed: 20
   DirectShotMinSpeed: 12
-  DynamicShotDistanceTreshold: 3
+  DynamicShotDistanceTreshold: 2
   Target: {fileID: 0}

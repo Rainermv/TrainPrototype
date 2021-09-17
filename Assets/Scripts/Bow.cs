@@ -12,14 +12,16 @@ using Vector3 = UnityEngine.Vector3;
 
 public class Bow : MonoBehaviour
 {
+    [Header("References")]
     public Arrow ArrowPrefab;
     public EntityTag[] TargetEntityTags;
     public ShotType ShotType;
-    [Space(2)]
+    [Header("Main Parameters")]
     public float MaxRange;
     public int Damage;
     public float Cooldown;
-    public float AimError = 1f;
+    public float AimError = 0.2f;
+    public EntityState[] EntityStatesItCanShoot;
 
     [Space(2)]
     [Header("Arc Shot")]
@@ -33,14 +35,14 @@ public class Bow : MonoBehaviour
 
     [Header("Dynamic Shot")]
     public double DynamicShotDistanceTreshold = 3f;
-
     
-
     [HideInInspector]
     public GameObject Target;
 
     private string _opponentTag;
     private List<EntityTag> _targetEntityTags;
+    private List<EntityState> _entityStatesItCanShoot;
+    private bool _canShoot = true;
 
 
     //private float ShotMinSpeed => SHOT_NORMAL_SPEED * 0.5f;
@@ -62,6 +64,9 @@ public class Bow : MonoBehaviour
     {
         _opponentTag = Tags.ENEMY;
         _targetEntityTags = TargetEntityTags.ToList();
+        _entityStatesItCanShoot = EntityStatesItCanShoot.ToList();
+
+
     }
 
     // Start is called before the first frame update
@@ -69,6 +74,7 @@ public class Bow : MonoBehaviour
     {
         StartCoroutine(ScanForTargets());
         StartCoroutine(Attack());
+
     }
 
     public bool TargetInRange
@@ -127,7 +133,7 @@ public class Bow : MonoBehaviour
     {
         while (true)
         {
-            if (Target != null)
+            if (Target != null && _canShoot)
             {
 
                 var aimPoint = AimToPointWithError(V2Position.x, Target, AimError);
@@ -307,6 +313,16 @@ Vector3 calcBallisticVelocityVector(Vector3 source, Vector3 target, float angle)
 
         // Alternative way:
         // rigid.AddForce(finalVelocity * rigid.mass, ForceMode.Impulse);
+    }
+
+    public void Initialize(Entity entity)
+    {
+        entity.OnUpdateMoveState += OnEntityUpdateMoveState;
+    }
+
+    private void OnEntityUpdateMoveState(EntityState entityState)
+    {
+        _canShoot = _entityStatesItCanShoot.Count <= 0 || _entityStatesItCanShoot.Contains(entityState);
     }
 }
 

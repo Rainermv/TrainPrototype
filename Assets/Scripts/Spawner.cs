@@ -6,7 +6,7 @@ public class Spawner : MonoBehaviour
 {
     public float SpawnInterval;
 
-    public Transform Enemies;
+    private Transform _enemiesTransform;
     public Entity EntityPrefab;
 
     public Transform pointA;
@@ -22,8 +22,13 @@ public class Spawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(SpawnEnemies());
+        //StartCoroutine(SpawnEnemies());
         target = pointA;
+    }
+
+    public void Initialize(Transform enemiesTransform)
+    {
+        _enemiesTransform = enemiesTransform;
     }
 
     private IEnumerator SpawnEnemies()
@@ -31,11 +36,20 @@ public class Spawner : MonoBehaviour
         while (true)
         {
             var enemy = Instantiate(EntityPrefab, transform.position, Quaternion.identity).GetComponent<Entity>();
-            enemy.transform.parent = Enemies;
+            enemy.transform.parent = _enemiesTransform;
             yield return new WaitForSeconds(SpawnInterval);
         }
     }
-    
+
+    public void Spawn(int numberOfUnits)
+    {
+        for (int i = 0; i < numberOfUnits; i++)
+        {
+            var enemy = Instantiate(EntityPrefab, transform.position, Quaternion.identity).GetComponent<Entity>();
+            enemy.transform.parent = _enemiesTransform;
+        }
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -55,4 +69,6 @@ public class Spawner : MonoBehaviour
             return;
         }
     }
+
+    
 }

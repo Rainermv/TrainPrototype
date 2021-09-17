@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5668274355080729497}
   - component: {fileID: 5229197810316166211}
   m_Layer: 0
-  m_Name: DoomBolt
+  m_Name: Proj_DoomBolt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 576535175315380644}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.272, y: -0.97, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_Children:
   - {fileID: 7707007597165284331}
   - {fileID: 9215854930685543867}

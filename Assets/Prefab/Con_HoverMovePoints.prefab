@@ -40,7 +40,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3107772945387030562}
   m_Layer: 0
-  m_Name: FlyByMovePoints
+  m_Name: Con_HoverMovePoints
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
