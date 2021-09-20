@@ -9,6 +9,7 @@ public class UIController : MonoBehaviour
     [Header("Station UI")]
     public GameObject StationUI;
     public UnityEngine.UI.Text TitleText;
+    public UnityEngine.UI.Text GoldText;
     public UnityEngine.UI.Text NextLevelButtonText;
     public UnityEngine.UI.Button NextLevelButton;
 
@@ -16,27 +17,27 @@ public class UIController : MonoBehaviour
     public GameObject LevelUI;
 
     private int _tier;
-    private UIState _state;
 
-    private Action<int> _onNextLevelButtonClicked;
+    private Action _onNextLevelButtonClicked;
 
 
-    public void Initialize(UIState uiState, Action<int> onNextLevelButtonClicked)
+    public void Initialize(GameData gameData, Action onNextLevelButtonClicked)
     {
-        SetState(uiState);
+        UpdateUI(gameData);
         _onNextLevelButtonClicked = onNextLevelButtonClicked;
     }
 
-    public void SetState(UIState state)
+    public void UpdateUI(GameData gameData)
     {
-        SetUiStatus(false);
-        _state = state;
-        switch (_state)
+        SetUiChildrenStatus(false);
+        switch (gameData.GameState)
         {
-            case UIState.Level:
+            case GameState.Level:
+                UpdateLevelUI(gameData);
                 LevelUI.SetActive(true);
                 break;
-            case UIState.Station:
+            case GameState.Station:
+                UpdateStationUI(gameData);
                 StationUI.SetActive(true);
                 break;
             default:
@@ -44,27 +45,31 @@ public class UIController : MonoBehaviour
         }
     }
 
-    private void SetUiStatus(bool isActive)
+    
+
+    private void SetUiChildrenStatus(bool isActive)
     {
         StationUI.gameObject.SetActive(isActive);
         LevelUI.gameObject.SetActive(isActive);
     }
 
-    public void InitializeStationUI(int level, int nextLevel)
+    private void UpdateLevelUI(GameData gameData)
     {
-        TitleText.text = $"Welcome to Station {level}";
-        _tier = level / 3;
-        NextLevelButtonText.text = $"Press to start level {nextLevel}";
-        
-        NextLevelButton.onClick.RemoveAllListeners(); // HAAAACK!!
-        NextLevelButton.onClick.AddListener(() =>
-        {
-            _onNextLevelButtonClicked(nextLevel);
-        });
-
-        SetState(UIState.Station);
-
+        //nothing for now
     }
 
-    
+    private void UpdateStationUI(GameData gameData)
+    {
+        TitleText.text = $"Welcome to Station {gameData.Level}";
+        //_tier = gameData.Tier;
+        NextLevelButtonText.text = $"Press to start level {gameData.Level+1}";
+        GoldText.text = $"Gold: {gameData.Gold}";
+
+        NextLevelButton.onClick.RemoveAllListeners();
+        NextLevelButton.onClick.AddListener(() =>
+        {
+            _onNextLevelButtonClicked();
+        });
+    }
+
 }

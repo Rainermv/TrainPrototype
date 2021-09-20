@@ -1,8 +1,8 @@
+using Assets.Scripts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Scripts;
 using UnityEngine;
 
 public class LevelController : MonoBehaviour
@@ -35,9 +35,8 @@ public class LevelController : MonoBehaviour
     private GameObject _station;
     private List<ScrollingBackgroundController> _backgrounds;
 
-    public Action<int, int> OnStationStartAction { get; set; }
-
-
+    public Action OnStationStartAction { get; set; }
+    
     private float _playerSpeed;
     private float _playerAcceleration;
     private float _playerWorldPosition = 0.5f;
@@ -46,9 +45,9 @@ public class LevelController : MonoBehaviour
 
     private int _level = 0;
     
-    public void Initialize(int initialLevel, Action<int, int> onStationStartAction)
+    public void Initialize(GameData gameData, Action onStationStartAction)
     {
-        _level = initialLevel;
+        _level = gameData.Level;
         _backgrounds = Backgrounds.GetComponentsInChildren<ScrollingBackgroundController>().ToList();
         _backgrounds.ForEach(background => background.Scale = BackgroundScale);
         OnStationStartAction = onStationStartAction;
@@ -144,7 +143,7 @@ public class LevelController : MonoBehaviour
 
     private void BeginStation()
     {
-       OnStationStartAction(_level, _level +1);
+       OnStationStartAction();
     }
 
 

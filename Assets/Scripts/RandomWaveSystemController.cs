@@ -53,8 +53,6 @@ public class RandomWaveSystemController : MonoBehaviour
         var numberOfUnits = Random.Range(enemiesMin, enemiesMax);
 
         var enemiesInWave = new List<Entity>();
-        _onUpdateUnitCount(enemiesInWave.Count);
-
         enemiesInWave.AddRange(RandomSpawner().Spawn(numberOfUnits, entity =>
         {
             enemiesInWave.Remove(entity);
@@ -65,7 +63,8 @@ public class RandomWaveSystemController : MonoBehaviour
                 onWaveEnds();
             }
         }));
-        //StartCoroutine(WaveEnemiesCheckRoutine(enemiesInWave, onWaveEnds));
+
+        _onUpdateUnitCount(enemiesInWave.Count);
     }
 
 

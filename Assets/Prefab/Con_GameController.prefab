@@ -43,3 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1118de749a9dc9448bc3837d92d749dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UIController: {fileID: 0}
+  LevelController: {fileID: 0}
+  PlayerGameObject: {fileID: 0}
+  GoldPopTextPrefab: {fileID: 7798405828600553703, guid: 1c711e84d46e2f64baffd4b99b9e71f8, type: 3}
