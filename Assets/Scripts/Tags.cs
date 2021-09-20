@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Assets.Scripts {
-    public class Tags {
-        public static string PLAYER = "Player";
-        public static string ENEMY = "Enemy";
+    public static class Tags {
+        public const string PLAYER = "Player";
+        public const string ENEMY = "Enemy";
+        public const string RightLimit = "RightLimit";
+        public const string LeftLimit = "LeftLimit";
     }
 }

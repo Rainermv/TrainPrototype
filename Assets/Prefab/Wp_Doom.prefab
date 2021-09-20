@@ -46,10 +46,10 @@ MonoBehaviour:
   ArrowPrefab: {fileID: 5668274355080729497, guid: c0366d0bd659d5744a56a7d3364f83f6, type: 3}
   TargetEntityTags: 01000000
   ShotType: 1
-  MaxRange: 8
+  MaxRange: 5
   Damage: 1
   Cooldown: 0.5
-  AimError: 0.5
+  AimError: 0.2
   EntityStatesItCanShoot: 00000000
   ArcShotHeightToTarget: 1
   ArcShotLateralSpeed: 5

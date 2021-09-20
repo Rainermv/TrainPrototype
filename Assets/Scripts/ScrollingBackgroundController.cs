@@ -5,41 +5,35 @@ namespace Assets.Scripts
 {
     public class ScrollingBackgroundController : MonoBehaviour
     {
+        public float ParallaxRatio = 1;
 
-        //prrivate float ScrollSpeed = -0.5f;
-        private Vector2 _savedOffset;
+        private Vector2 _initialOffset;
         private Renderer _renderer;
-        public float Ratio;
-        public float BaseSpeed;
+
+        [HideInInspector]
+        public float Scale = 1;
+
+        public void UpdateScreenPosition(float playerWorldPosition)
+        {
+            var scaledPosition = playerWorldPosition * ParallaxRatio * (1 / Scale);
+            var repeat = Mathf.Repeat(scaledPosition, 1);
+            var offset = new Vector2(repeat, _initialOffset.y);
+            _renderer.material.mainTextureOffset = offset;
+        }
 
         private void Awake()
         {
             _renderer = GetComponent<Renderer>();
-            _savedOffset = _renderer.material.mainTextureOffset;
+            _initialOffset = _renderer.material.mainTextureOffset;
         }
-
-        private void Start()
-        {
-        }
-
-        private void FixedUpdate()
-        {
-            var worldSpeed = BaseSpeed * Ratio;
-            var worldTime = worldSpeed * Time.fixedTime;
-
-            var repeat = Mathf.Repeat(worldTime, 1);
-            var offset = new Vector2(repeat, _savedOffset.y);
-
-            _renderer.material.mainTextureOffset = offset;
-        }
-
         
 
         private void OnDisable()
         {
-            _renderer.material.mainTextureOffset = _savedOffset;
+            _renderer.material.mainTextureOffset = _initialOffset;
         }
 
 
+        
     }
 }

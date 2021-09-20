@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,23 +32,19 @@ public class Spawner : MonoBehaviour
         _enemiesTransform = enemiesTransform;
     }
 
-    private IEnumerator SpawnEnemies()
+    public List<Entity> Spawn(int numberOfUnits, Action<Entity> onEntityDestroyed)
     {
-        while (true)
+        var entities = new List<Entity>();
+        for (var i = 0; i < numberOfUnits; i++)
         {
             var enemy = Instantiate(EntityPrefab, transform.position, Quaternion.identity).GetComponent<Entity>();
             enemy.transform.parent = _enemiesTransform;
-            yield return new WaitForSeconds(SpawnInterval);
-        }
-    }
+            enemy.OnEntityDestroyed += onEntityDestroyed;
+            entities.Add(enemy);
 
-    public void Spawn(int numberOfUnits)
-    {
-        for (int i = 0; i < numberOfUnits; i++)
-        {
-            var enemy = Instantiate(EntityPrefab, transform.position, Quaternion.identity).GetComponent<Entity>();
-            enemy.transform.parent = _enemiesTransform;
         }
+
+        return entities;
     }
 
 

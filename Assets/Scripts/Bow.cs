@@ -98,7 +98,7 @@ public class Bow : MonoBehaviour
         while (true)
         {
 
-            if (Target == null || (Target != null && !TargetInRange))
+            if (_canShoot && Target == null || (Target != null && !TargetInRange))
             {
 
                 var scan = Physics2D.OverlapCircleAll(transform.position, MaxRange);
@@ -122,7 +122,7 @@ public class Bow : MonoBehaviour
 
             }
 
-            yield return new WaitForSeconds(0.1f);
+            yield return null; //new WaitForSeconds(0.1f);
 
         }
     }

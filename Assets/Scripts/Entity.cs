@@ -36,6 +36,8 @@ public class Entity : MonoBehaviour
     private EntityState _entityState;
 
     public Action<EntityState> OnUpdateMoveState;
+    public Action<Entity> OnEntityDestroyed; // this means the gameObject was destroyed (either by enemy or by trigger)
+    public Action<Entity> OnEntityKilled; // this means the health went to zero (may be used to count score)
 
 
     private Vector2 V2Position => (Vector2)transform.position;
@@ -55,6 +57,15 @@ public class Entity : MonoBehaviour
 
         maxHealth = Health;
 
+    }
+
+    public void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.tag == Tags.RightLimit)
+        {
+            Destroy(gameObject, 1);
+            OnEntityDestroyed?.Invoke(this);
+        }
     }
 
     void Start()
@@ -245,6 +256,8 @@ public class Entity : MonoBehaviour
     private void Die() {
 
         gameObject.SetActive(false);
+        OnEntityKilled?.Invoke(this);
+        OnEntityDestroyed?.Invoke(this);
         Destroy(gameObject);
 
     }

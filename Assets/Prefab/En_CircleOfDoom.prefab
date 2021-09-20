@@ -132,11 +132,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EntityMovementType: 2
   EntityTags: 04000000
-  Speed: 5
+  Speed: 3
   Health: 3
-  FlyByMovePointsBeforeExit: 1
+  FlyByMovePointsBeforeExit: 3
   FlyByMoveAdjacentMagnitude: 1
-  FlyByWaitingTime: 1
+  FlyByWaitingTime: 3
   FlyByDistanceToReachPoint: 0.2
 --- !u!58 &5391026022713208868
 CircleCollider2D:
@@ -282,7 +282,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4993741250166197902, guid: 62f1498338c244c4dba2e629c71e0fdf, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.246
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4993741250166197902, guid: 62f1498338c244c4dba2e629c71e0fdf, type: 3}
       propertyPath: m_LocalPosition.z

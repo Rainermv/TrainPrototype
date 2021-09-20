@@ -49,10 +49,10 @@ MonoBehaviour:
   EntityMovementType: 2
   EntityTags: 04000000
   Speed: 5
-  Health: 10
+  Health: 1
   FlyByMovePointsBeforeExit: 10
   FlyByMoveAdjacentMagnitude: 1
-  FlyByWaitingTime: 0
+  FlyByWaitingTime: 5
   FlyByDistanceToReachPoint: 0.5
 --- !u!58 &5391026022713208868
 CircleCollider2D:
