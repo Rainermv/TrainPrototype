@@ -9,30 +9,75 @@ public class GameController : MonoBehaviour
 {
     public UIController UIController;
     public LevelController LevelController;
-    public GameObject PlayerGameObject;
     public TextMeshPro GoldPopTextPrefab;
+    public TrainController TrainController;
 
+    public WagonComponent[] WagonComponentPrefabs;
+
+    
     private GameData _gameData;
-
+    private List<WagonComponent> _wagonLibrary;
+    //private List<WagonComponent> _playerWagons = new List<WagonComponent>();
+    
+    private const float GridSize = 1.5f;
+    
     void Awake()
     {
+        _wagonLibrary = WagonComponentPrefabs.ToList();
+        _gameData = GameData.InitGameData();
     }
     // Start is called before the first frame update
     void Start()
     {
-        _gameData = GameData.InitGameData();
+
+        InstantiateWagons(_gameData.PlayerWagons);
 
         // UI CONTROLLER
-        UIController.Initialize(_gameData, OnStartLevel);
+        UIController.Initialize(_gameData, _wagonLibrary, OnStartLevel);
+        UIController.OnBuyWagonButtonClicked = component =>
+        {
+            AddWagon(component);
+        };
         //UIController.StateStationUI(_gameData);
 
         // LEVEL CONTROLLER
-
         LevelController.Initialize(_gameData, OnStartStation);
 
 
     }
-    
+
+    void Update()
+    {
+        switch (_gameData.GameState)
+        {
+            case GameState.Level:
+                LevelController.OnUpdate();
+                break;
+            case GameState.Station:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+    }
+
+    private void InstantiateWagons(List<int> playerWagonsToInstantiate)
+    {
+        foreach (var playerWagonIndex in playerWagonsToInstantiate)
+        {
+            var wagonPrefab = _wagonLibrary[playerWagonIndex];
+            AddWagon(wagonPrefab);
+        }
+    }
+
+    private void AddWagon(WagonComponent wagonPrefab)
+    {
+        var wagon = TrainController.AddWagonOnRear(wagonPrefab);
+        
+        // DragSlot
+        UIController.AddDraggableSlot(wagon.transform.position, wagon, wagon.WagonName);
+    }
+
     private void OnStartLevel()
     {
         _gameData.GameState = GameState.Level;
@@ -44,17 +89,17 @@ public class GameController : MonoBehaviour
 
     private void OnStartStation()
     {
-        var cargoWagons = PlayerGameObject.GetComponentsInChildren<Cargo>();
+        var cargoWagons = TrainController.GetComponentsInChildren<Cargo>().ToList();
 
         _gameData.GameState = GameState.Station;
         _gameData.Gold += cargoWagons.Sum(cargo => cargo.GoldValue);
+
 
         UIController.UpdateUI(_gameData);
 
         foreach (var cargoWagon in cargoWagons)
         {
             StartCoroutine(DisplayGoldValueRoutine(cargoWagon));
-            
         }
         // wait for player to click the start button
     }

@@ -45,5 +45,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UIController: {fileID: 0}
   LevelController: {fileID: 0}
-  PlayerGameObject: {fileID: 0}
   GoldPopTextPrefab: {fileID: 7798405828600553703, guid: 1c711e84d46e2f64baffd4b99b9e71f8, type: 3}
+  TrainController: {fileID: 0}
+  WagonComponentPrefabs:
+  - {fileID: -4014451669107776430, guid: 097c7b837a5c4554187e43104ae1fe0d, type: 3}
+  - {fileID: -7368311531130247285, guid: 9b65ad04f375a35419625f0b16f13a42, type: 3}

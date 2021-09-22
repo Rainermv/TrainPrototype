@@ -57,7 +57,7 @@ public class LevelController : MonoBehaviour
         SetSpeed(StoppedSpeed); // Initial speed is zero (stopped start)
     }
 
-    void Update()
+    public void OnUpdate()
     {
         _playerWorldPosition += _playerSpeed * Time.deltaTime;
         

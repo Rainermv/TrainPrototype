@@ -18,6 +18,7 @@ public class Entity : MonoBehaviour
 
     public float Speed;
     public int Health;
+    public bool IsMovable;
 
     public int FlyByMovePointsBeforeExit = 3;
     public float FlyByMoveAdjacentMagnitude = 0;
