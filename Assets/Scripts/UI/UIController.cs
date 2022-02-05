@@ -1,10 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 public class UIController : MonoBehaviour
 {
@@ -16,11 +14,12 @@ public class UIController : MonoBehaviour
 
     [Header("Station UI")] public GameObject StationUI;
     public Transform SlotsTransform;
-    public Transform BuildMenuTransform;
-    public UnityEngine.UI.Text TitleText;
-    public UnityEngine.UI.Text GoldText;
-    public UnityEngine.UI.Text NextLevelButtonText;
-    public UnityEngine.UI.Button NextLevelButton;
+    public Transform BuildMenuTransform;    
+    public TextMeshProUGUI BigTitleText;
+    public Text TitleText;
+    public Text GoldText;
+    public Text NextLevelButtonText;
+    public Button NextLevelButton;
 
     [Header("Level UI")] public GameObject LevelUI;
 
@@ -28,6 +27,7 @@ public class UIController : MonoBehaviour
 
     private Action _onNextLevelButtonClicked;
     public Action<WagonComponent> OnBuyWagonButtonClicked;
+    private List<BuyWagonButton> _buyWagonButtons = new List<BuyWagonButton>();
 
 
     public void Initialize(GameData gameData, List<WagonComponent> wagonLibrary,
@@ -45,16 +45,20 @@ public class UIController : MonoBehaviour
     {
         foreach (var wagonComponent in wagonLibrary)
         {
-            var wagonButton = Instantiate(WagonButtonPrefab, BuildMenuTransform);
+            var buyWagonButton = Instantiate(WagonButtonPrefab, BuildMenuTransform);
+            
+            buyWagonButton.ImageComponent.sprite = wagonComponent.SpriteRenderer.sprite;
+            buyWagonButton.NameComponent.text = wagonComponent.WagonName;
+            buyWagonButton.MoneyValueComponent.text = $"{wagonComponent.WagonPrice} Gold";
+            buyWagonButton.WagonComponent = wagonComponent;
 
-            wagonButton.ButtonComponent.onClick.AddListener(() =>
+            _buyWagonButtons.Add(buyWagonButton);
+
+            buyWagonButton.ButtonComponent.onClick.AddListener(() =>
             {
-                OnBuyWagonButtonClicked(wagonComponent);
+                OnBuyWagonButtonClicked(buyWagonButton.WagonComponent);
             });
 
-            wagonButton.ImageComponent.sprite = wagonComponent.SpriteRenderer.sprite;
-            wagonButton.NameComponent.text = wagonComponent.WagonName;
-            wagonButton.MoneyValueComponent.text = $"{wagonComponent.WagonPrice} Gold";
         }
     }
 
@@ -91,13 +95,20 @@ public class UIController : MonoBehaviour
 
     private void UpdateStationUI(GameData gameData)
     {
-        TitleText.text = $"Welcome to Station {gameData.Level}";
+        TitleText.text = $"Welcome to Station {gameData.Level:00}";
+        BigTitleText.text = $"Station {gameData.Level:00}";
+
         //_tier = gameData.Tier;
         NextLevelButtonText.text = $"Press to start level {gameData.Level + 1}";
         GoldText.text = $"Gold: {gameData.Gold}";
 
         NextLevelButton.onClick.RemoveAllListeners();
         NextLevelButton.onClick.AddListener(() => { _onNextLevelButtonClicked(); });
+
+        foreach (var buyWagonButton in _buyWagonButtons)
+        {
+            buyWagonButton.SetEnabled(gameData.Gold - buyWagonButton.WagonComponent.WagonPrice >= 0);
+        }
     }
 
     public void AddDraggableSlot(Vector3 worldPosition, WagonComponent wagonComponent, string id)
@@ -189,7 +200,7 @@ public class UIController : MonoBehaviour
 
                 break;
             case DragAndDropCell.TriggerType.DropEventEnd:                      // Drop event completed (successful or not)
-                if (desc.permission == true)                                    // If drop successful (was permitted before)
+                if (desc.permission)                                    // If drop successful (was permitted before)
                 {
                     Debug.Log("Successful drop " + desc.item.name + " from " + sourceCell.name + " to " + destinationCell.name);
 

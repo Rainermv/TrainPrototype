@@ -7,6 +7,7 @@ using TMPro;
 
 public class GameController : MonoBehaviour
 {
+    public int MaxTrainSize;
     public UIController UIController;
     public LevelController LevelController;
     public TextMeshPro GoldPopTextPrefab;
@@ -30,19 +31,29 @@ public class GameController : MonoBehaviour
     void Start()
     {
 
-        InstantiateWagons(_gameData.PlayerWagons);
 
         // UI CONTROLLER
         UIController.Initialize(_gameData, _wagonLibrary, OnStartLevel);
-        UIController.OnBuyWagonButtonClicked = component =>
+        UIController.OnBuyWagonButtonClicked = (wagonComponent) =>
         {
-            AddWagon(component);
+            if (TrainController.TrainSize >= MaxTrainSize)
+            {
+                return;
+            }
+
+            if (_gameData.Gold - wagonComponent.WagonPrice > 0)
+            {
+                AddWagon(wagonComponent);
+                _gameData.Gold -= wagonComponent.WagonPrice;
+                UIController.UpdateUI(_gameData);
+            }
         };
         //UIController.StateStationUI(_gameData);
 
         // LEVEL CONTROLLER
         LevelController.Initialize(_gameData, OnStartStation);
 
+        InstantiateWagons(_gameData.PlayerWagons);
 
     }
 

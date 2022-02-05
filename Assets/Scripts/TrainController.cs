@@ -6,15 +6,16 @@ public class TrainController : MonoBehaviour
 {
     public Entity Engine;
     
-    private Bounds _engineBounds;
+    private SpriteRenderer _egineSpriteRenderer;
     private List<WagonComponent> _wagons = new List<WagonComponent>();
 
     public Transform marker;
+    public int TrainSize => _wagons.Count;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        _engineBounds = Engine.GetComponentInChildren<SpriteRenderer>().bounds;
+        _egineSpriteRenderer = Engine.GetComponentInChildren<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -27,8 +28,9 @@ public class TrainController : MonoBehaviour
     {
         
         // GameObject
-        var wagon = Instantiate(wagonPrefab, transform, true);
-        wagon.transform.position =  CalculateRearPosition(wagon.SpriteRenderer.bounds);
+        var wagon = Instantiate(wagonPrefab, transform);
+        wagon.transform.position =  CalculateRearPosition(wagon.SpriteRenderer.bounds, 
+        _egineSpriteRenderer.bounds);
         //wagon.Bounds = wagon.GetComponent<Collider2D>().bounds;
 
         _wagons.Add(wagon);
@@ -36,10 +38,10 @@ public class TrainController : MonoBehaviour
         return wagon;
     }
 
-    private Vector3 CalculateRearPosition(Bounds wagonBounds)
+    private Vector3 CalculateRearPosition(Bounds wagonBounds, Bounds engineBounds)
     {
         
-        var position = new Vector2(_engineBounds.min.x, _engineBounds.min.y); //   [][][].[engine]
+        var position = new Vector2(engineBounds.min.x, engineBounds.min.y); //   [][][].[engine]
         float offset = 0.1f;
 
         //[][].[][engine]
@@ -50,6 +52,8 @@ public class TrainController : MonoBehaviour
 
         position.x -= wagonBounds.extents.x;
         position.y += wagonBounds.extents.y - wagonBounds.center.y;
+
+        Instantiate(marker).position = position;
 
         return position;
 
